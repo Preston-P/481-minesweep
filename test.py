@@ -150,6 +150,7 @@ class Minesweeper:
             for y in range(0, SIZE_Y):
                 # print(self.tiles[x][y])
                 if self.tiles[x][y]["state"] == 1 and self.tiles[x][y]["isMine"] == False:
+                    print(self.tiles[x][y])
 
                     mineReveal.append(self.tiles[x][y]["coords"])
 
@@ -164,21 +165,19 @@ class Minesweeper:
                     # self.onClick(self.tiles[x][y])
                     self.nonClickedCoords.append(self.tiles[x][y]["id"])
 
-    def updateTile(self, x, y):
-        for n in self.getNeighbors(x, y):
-            if n["mines"] <= 0 and n["isMine"] == False:
-                n["button"].config(image=self.images["mine"])
-
     def restart(self):
         self.setup()
         self.refreshLabels()
+        self.refreshcoords()
 
     def refreshLabels(self):
         self.labels["flags"].config(text="Flags: "+str(self.flagCount))
         self.labels["mines"].config(text="Mines: "+str(self.mines))
         # need to make a refresh label for mines listed, could possibly only show one at a time and in order
+
+    def refreshcoords(self):
         self.labels["coords"].config(
-            text="Best Coordinates: "+str(self.nonClickedCoords))
+            text="Best Coordinates: "+str(self.nonClickedCoords[::1]))
 
     def gameOver(self, won):
         for x in range(0, SIZE_X):
@@ -246,15 +245,17 @@ class Minesweeper:
         # change image        original was:  if tile["mines"] == 0 modified:
         if tile["mines"] == 0:
             tile["button"].config(image=self.images["clicked"])
-            # orig
-            print("Current tile:", tile["id"])
-            self.nonClickedCoords.remove(tile["id"])
 
+            # orig
             self.clearSurroundingTiles(tile["id"])
+            # added myself
+            self.refreshcoords()
 
         else:
             tile["button"].config(
                 image=self.images["numbers"][tile["mines"]-1])
+            self.nonClickedCoords.remove(tile["id"])
+            self.refreshcoords()
         # if not already set as clicked, change state and count
         if tile["state"] != STATE_CLICKED:
             tile["state"] = STATE_CLICKED
@@ -302,22 +303,38 @@ class Minesweeper:
                 self.clearTile(tile, queue)
 
     def clearTile(self, tile, queue):
+        # the queue contains all the ids that are revealed. but i think they repeat
+        # prob do something with the queue since tile ids are appending into the queue
+
+        print(queue)
         if tile["state"] != STATE_DEFAULT:
-            for tile in self.getNeighbors(x, y):
-                self.nonClickedCoords.pop(0)
-            self.refreshLabels()
+            # self.nonClickedCoords.remove(tile["id"])
+            self.nonClickedCoords[::1]
+            self.refreshcoords()
             return
 
         if tile["mines"] == 0:
+            # marks all of them as clicked but the actual stat eisnt updated
             tile["button"].config(image=self.images["clicked"])
+
             queue.append(tile["id"])
+            # self.nonClickedCoords.remove(tile["id"])
+            #yum = self.getNeighbors(tile["coords"]["x"], tile["coords"]["y"])
+            for x in range(0, SIZE_X):
+                for y in range(0, SIZE_Y):
+                    if self.tiles[x][y]["id"] in queue and self.tiles[x][y]["mines"] > 0:
+                        self.tiles[x][y]["state"] = STATE_CLICKED
+                        # print(self.tiles[x][y])
+                        # self.nonClickedCoords.remove(self.tiles[x][y]["id"])
+                        # self.refreshcoords()
+                        if tile["state"] == 1:
+                            self.nonClickedCoords.remove(tile["id"])
 
         else:
             tile["button"].config(
                 image=self.images["numbers"][tile["mines"]-1])
 
         tile["state"] = STATE_CLICKED
-
         self.clickedCount += 1
 
         ### END OF CLASSES ###

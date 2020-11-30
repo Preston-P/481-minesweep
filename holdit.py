@@ -146,14 +146,20 @@ class Minesweeper:
 
         mineReveal = []
 
+        for x in Minecoords:
+            print(x)
+        print("------Revealed Mines-----------")
+
         for x in range(0, SIZE_X):
             for y in range(0, SIZE_Y):
                 # print(self.tiles[x][y])
                 if self.tiles[x][y]["state"] == 1 and self.tiles[x][y]["isMine"] == False:
+                    print(self.tiles[x][y])
 
                     mineReveal.append(self.tiles[x][y]["coords"])
 
         uniqueMines = []
+        print("----prints neighbors of the mine-----")
 
         self.nonClickedCoords = []
         for x in range(0, SIZE_X):
@@ -163,6 +169,19 @@ class Minesweeper:
                 if self.tiles[x][y]["state"] == 0 and self.tiles[x][y]["isMine"] == False:
                     # self.onClick(self.tiles[x][y])
                     self.nonClickedCoords.append(self.tiles[x][y]["id"])
+        print('--output of nonclicked coords--------')
+        for y in self.nonClickedCoords:
+            print(y)
+
+        """
+        for g in self.nonClickedCoords:
+            print(g)
+
+        for x in range(0, SIZE_X):
+            for y in range(0, SIZE_Y):
+                if self.tiles[x][y]["id"] == self.nonClickedCoords[0] and self.tiles[x][y]["state"] == 1:
+                    self.nonClickedCoords.pop(0)
+        """
 
     def updateTile(self, x, y):
         for n in self.getNeighbors(x, y):
@@ -247,10 +266,8 @@ class Minesweeper:
         if tile["mines"] == 0:
             tile["button"].config(image=self.images["clicked"])
             # orig
-            print("Current tile:", tile["id"])
-            self.nonClickedCoords.remove(tile["id"])
-
             self.clearSurroundingTiles(tile["id"])
+            #self.updateTile(tile["coords"]["x"], tile["coords"]["y"])
 
         else:
             tile["button"].config(
@@ -303,14 +320,15 @@ class Minesweeper:
 
     def clearTile(self, tile, queue):
         if tile["state"] != STATE_DEFAULT:
-            for tile in self.getNeighbors(x, y):
-                self.nonClickedCoords.pop(0)
+            self.nonClickedCoords.remove(tile["id"])
             self.refreshLabels()
             return
 
         if tile["mines"] == 0:
             tile["button"].config(image=self.images["clicked"])
             queue.append(tile["id"])
+            self.nonClickedCoords.remove(tile["id"])
+            self.refreshLabels()
 
         else:
             tile["button"].config(

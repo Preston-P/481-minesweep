@@ -150,6 +150,7 @@ class Minesweeper:
             for y in range(0, SIZE_Y):
                 # print(self.tiles[x][y])
                 if self.tiles[x][y]["state"] == 1 and self.tiles[x][y]["isMine"] == False:
+                    print(self.tiles[x][y])
 
                     mineReveal.append(self.tiles[x][y]["coords"])
 
@@ -163,6 +164,16 @@ class Minesweeper:
                 if self.tiles[x][y]["state"] == 0 and self.tiles[x][y]["isMine"] == False:
                     # self.onClick(self.tiles[x][y])
                     self.nonClickedCoords.append(self.tiles[x][y]["id"])
+
+        """
+        for g in self.nonClickedCoords:
+            print(g)
+
+        for x in range(0, SIZE_X):
+            for y in range(0, SIZE_Y):
+                if self.tiles[x][y]["id"] == self.nonClickedCoords[0] and self.tiles[x][y]["state"] == 1:
+                    self.nonClickedCoords.pop(0)
+        """
 
     def updateTile(self, x, y):
         for n in self.getNeighbors(x, y):
@@ -247,9 +258,6 @@ class Minesweeper:
         if tile["mines"] == 0:
             tile["button"].config(image=self.images["clicked"])
             # orig
-            print("Current tile:", tile["id"])
-            self.nonClickedCoords.remove(tile["id"])
-
             self.clearSurroundingTiles(tile["id"])
 
         else:
@@ -303,9 +311,7 @@ class Minesweeper:
 
     def clearTile(self, tile, queue):
         if tile["state"] != STATE_DEFAULT:
-            for tile in self.getNeighbors(x, y):
-                self.nonClickedCoords.pop(0)
-            self.refreshLabels()
+            self.nonClickedCoords.remove(tile["id"])
             return
 
         if tile["mines"] == 0:
